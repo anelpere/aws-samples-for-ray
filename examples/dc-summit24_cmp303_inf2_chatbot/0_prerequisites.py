@@ -41,24 +41,6 @@ policy_document = {
 }
 policy_document_json = json.dumps(policy_document, ensure_ascii=False)
 
-# Create the IAM policy
-try:
-    response = iam.create_policy(
-        PolicyName=policy_name,
-        PolicyDocument=str(policy_document_json)
-    )
-    # Store the policy ARN as an output
-    policy_arn = response['Policy']['Arn']
-    policy_arns = [
-        'arn:aws:iam::aws:policy/AmazonEC2FullAccess',
-        'arn:aws:iam::aws:policy/AmazonS3FullAccess',
-        policy_arn
-    ]
-
-except iam.exceptions.EntityAlreadyExistsException:
-    # If the policy already exists store the Arn
-    print("IAM Policy already exists. Continuing...")
-
 role_name = 'ray-head-role'
 
 try:
@@ -69,7 +51,7 @@ try:
         print(f"Use the following IAM Role= {ray_role_arn}")
 # Role doesn't exist, create it
 except iam.exceptions.NoSuchEntityException:
-    iam.create_role(
+    response = iam.create_role(
         RoleName=role_name,
         AssumeRolePolicyDocument='''{
         "Version": "2012-10-17",
@@ -85,13 +67,38 @@ except iam.exceptions.NoSuchEntityException:
     }''',
     Description='Ray Head Role'
     )
+    #Attach policies to IAM Role
     if 'Role' in response:
         role_arn = response['Role']['Arn']
         print(f"The IAM role '{role_name}' has been created.")
         print(f"Use the following IAM Role= {role_arn}")
     else:
         print("Failed to create the IAM role.")
-
+try:
+    #create instance profile
+    instance_profile_response = iam.create_instance_profile(
+        InstanceProfileName='ray-instance-profile')
+    #Attach instance profile to the role
+    iam.add_role_to_instance_profile(
+        InstanceProfileName='ray-instance-profile',
+        RoleName=role_name
+    )
+except iam.exceptions.EntityAlreadyExistsException:
+        print("Instance profile already exists. Continuing...")
+    
+    # Create the IAM policy
+try:
+    response = iam.create_policy(
+        PolicyName=policy_name,
+        PolicyDocument=str(policy_document_json)
+    )
+    # Store the policy ARN as an output
+    policy_arn = response['Policy']['Arn']
+    policy_arns = [
+        'arn:aws:iam::aws:policy/AmazonEC2FullAccess',
+        'arn:aws:iam::aws:policy/AmazonS3FullAccess',
+        policy_arn
+    ]
     #Attach IAM policies to the role
     for policy_arn in policy_arns:
         try:
@@ -102,5 +109,9 @@ except iam.exceptions.NoSuchEntityException:
             print(f"Attached policy {policy_arn} to role {role_name}")
         except Exception as e:
             print(f"Error attaching policy {policy_arn} to role {role_name}: {e}")
+
+except iam.exceptions.EntityAlreadyExistsException:
+    # If the policy already exists store the Arn
+    print("IAM Policy already exists. Continuing...")
 except Exception as e:
     print(f"An error occurred: {e}")
