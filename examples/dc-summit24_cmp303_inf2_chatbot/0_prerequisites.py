@@ -6,7 +6,7 @@ import json
 accessToken = 'XXXXXXXXXXXXXXXXXXXXXXXXXX'
 
 #store HF token in secrets manager
-secrets = boto3.client('secretsmanager')
+secrets = boto3.client('secretsmanager', region_name='us-east-1')
 try:
     response = secrets.create_secret(
     Name='HFaccessToken',
