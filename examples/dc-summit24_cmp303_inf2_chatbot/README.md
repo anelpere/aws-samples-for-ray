@@ -31,7 +31,7 @@ aws ec2 describe-images --region us-east-1 --owners amazon \
 ```
 > **PLEASE NOTE**: Ensure that you modify the "--region" property for the region you wish to operate in
 
-* Modify `2_aws_neuron_core_inference_serve.py` and replace the "region_name" to the desired value (if needed) for "secrets_manager".
+* Modify `2_aws_neuron_core_inference_serve.py`, `3_aws_neuron_core_inference_serve_autoscaling.py`, `4_aws_neuron_core_inference_serve__gradio.py` and replace the "region_name" to the desired value (if needed) for "secrets_manager".
 
 1. Start your Ray cluster from your local laptop (pre-requisite of Ray installation):
 
