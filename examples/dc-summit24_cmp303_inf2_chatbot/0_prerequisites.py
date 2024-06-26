@@ -3,6 +3,7 @@ import boto3
 import json
 
 #Huggingface user access token
+#WARNING: DO NOT publish your access token
 accessToken = 'XXXXXXXXXXXXXXXXXXXXXXXXXX'
 
 #store HF token in secrets manager
