@@ -13,6 +13,7 @@ try:
     SecretString= accessToken
     )
     secret_arn = response['ARN']
+    print("Secret has been created successfully. Continuing...")
 except secrets.exceptions.ResourceExistsException:
     #describe secret and store the arn as a variable
     response = secrets.describe_secret(
